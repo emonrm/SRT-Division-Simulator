@@ -1,8 +1,7 @@
+
 /*
-	******************************************************************************************************************
-	This project was done by 'Md Mahbubur Rahman' & 'Shamikul Amin' as a requirement of 'CS5803' course in FALL 2015.
-	Department of Computer Science, Missouri S & T, Rolla, MO-65401, USA.
-	******************************************************************************************************************
+* Author: Mahbubur Rahman
+* r.mahbub@wayne.edu
 */
 
 
@@ -13,9 +12,8 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
-#include <math.h>
-
 using namespace std;
+
 #define debug false		// only shows the results after applying SRT method
 #define simulation true	// enable to see all the simulaiton steps inside SRT method
 #define dout debug && cout
@@ -58,7 +56,7 @@ void print_simulation_step(){sout << endl;}
 //print the result in proper format
 void println(string aq, string b, result res){
 	dout<<"A = "<<aq<<"\tB = "<<b<<"\nRemainder = "<<res.remainder<<"\tQuotient = "<<res.quotient<<"\tT = "<<res.execution_time<<" Δt.";
-	dout << endl;
+	dout << endl << endl;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +94,6 @@ int arg_check_overflow(const string & arg1, const string & arg2){
 	return overflow;
 }
 ///////////////////////////////////////////////////////////////////////////////
-
 
 
 ////////////////////// Normalize Args/////////////////////////
@@ -166,7 +163,7 @@ void arg_compliment(const string & arg1, string & arg2){
 
 //////////////////////////////////////////////////////////////
 
-/////////////////////// Skip/Shift over zeroes/ones //////////////
+/////////////////////// Skip/Shift over zeroes //////////////
 //arg: aq
 //count: shift_count , will be decresing
 //ch: skip over 0 or 1
@@ -208,16 +205,16 @@ int arg_skip_over(string & arg, int & count, char ch){
 //arg1: content of aq
 //arg2: b or -b 
 /* addition logic
+	Cin 	A 	B 		R 	Cout
+	0 		0 	0 		0 	0
+	0 		0 	1		1	0
+	0 		1	0		1	0
+	0		1	1		0	1
+	1		0	0		1	0
+	1		0	1		0	1
+	1		1	0		0	1
+	1		1	1		1	1		
 
-	Cin  A  B   R  Cout
-	0    0  0   0  0
-	0    0  1   1  0
-	0    1  0   1  0  
-	0    1  1   0  1
-	1    0  0   1  0
-	1    0  1   0  1
-	1    1  0   0  1
-	1    1  1   1  1		
 */
 void arg_add(string & arg1, const string & arg2){
 	char carry = '0';
@@ -235,10 +232,10 @@ void arg_add(string & arg1, const string & arg2){
 		else{ /* do nothing, could also check for * marker here but not neccessarily.*/ }
 	}
 	// discard the final C_out
-	// cost calculation for one addition (carry select)
+
+											// cost calculation for one addition (carry select)
 	int m = 2;								// 2 bit full adder
 	int N = arg2.length() - 1;				// total number of bits to add
-	if(N % m) { N += (N % m);}				// round divisor length while not integer multiple of m-bit adder
 	int m_t = 6;							// total time for m bit full adder
 	int temp = (((N / m) - 1) * 2) + m_t;	// generalized equation for cost calculation in addition
 	total_cost += temp;
@@ -278,6 +275,7 @@ result division_srt(string aq, string b){
 	arg_compliment(b, comp_b);					// calculates 2's compliment of normalized b
 	print_simulation_step("2's Com. (Normalize B)", comp_b, 2, true);
 	print_simulation_step("SRT Steps", 25);
+
 
 	arg_normalize(aq, adjustment_factor, 1);	//adjust AQ, and insert * in LSBs
 	print_simulation_step("Adjust AQ", aq);
@@ -328,6 +326,7 @@ result division_srt(string aq, string b){
 		}
 	}
 
+
 	//////////////////////////////Remainder Correction///////////////////////////////
 												// Remainder is negative, correct it.
 	bool i_r = false;
@@ -364,6 +363,7 @@ result division_srt(string aq, string b){
 	ss << total_cost;
 	string temp;
 	ss >> temp;
+
 	print_simulation_step("Total Cost", temp + " Δt", 2, false, true);
 	print_simulation_step();
 	print_simulation_step();
@@ -375,9 +375,11 @@ result division_srt(string aq, string b){
 
 	return div_result;
 }
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////// MAIN FUNCTION //////////////////////////////////////////////////////////////////
+
 
 int main(int argc, char * argv[]){
 	string arg_aq, arg_b;
@@ -386,29 +388,30 @@ int main(int argc, char * argv[]){
 	if (!file.is_open()) {cout << "Can't open file !" << endl; exit(EXIT_FAILURE);}
 	int iteration_count = 1;
 	while (! file.eof()){
-		file >> arg_aq >> arg_b;	// read input args from file
+		file >> arg_aq >> arg_b;										// read input args from file
+
 		cout << "\n(" << iteration_count++ << ")\n";
 		////////////////Devide overflow testing/////////////////
 		overflow_type = arg_check_overflow(arg_aq, arg_b);
 		if (overflow_type == 1){
 			cout << "\nA Q = " << arg_aq << "  B = " << arg_b << endl;
-			cout << "Divide by Zero overflow occured!" << endl;
+			cout << "Divide by Zero overflow occured! \n" << endl;
 			continue;
 		}
 		else if(overflow_type == 2){
-			cout << "A Q = " << arg_aq << "  B = " << arg_b << endl;
-			cout << "A >= B overflow condition found! \n" << endl;
-			cout << "Adding 2 zeros at the beginnig of AQ and 1 zero at the end of B to avoid overflow. \n";
-			cout << "Floating point representation (only power) of divident is adjusted (added) by 2.\n";
-			arg_aq.insert(1, "00");
-			arg_b.insert(arg_b.length(), "0");
-			
+			cout << "\nA Q = " << arg_aq << "  B = " << arg_b << endl;
+			cout << "A >= B overflow occured! \n" << endl;
+			continue;
 		}
+
 		///////////////////////////////////////////////////////////
 
-		result res = division_srt(arg_aq, arg_b); // store the result in res.
+		result res = division_srt(arg_aq, arg_b);					// store the result in res.
+		
 		println(arg_aq, arg_b, res);
+
 	}
+
 	file.close();
 
 	return 0;
