@@ -6,4 +6,5 @@ It generates the result, execution time in term of ∆t, where ∆t is the delay
 
 
 *Uses carry select adder to perform addition,
-*Shift operation is 3∆t, and 2s complement operation is n*∆t (n is the operand length).
+*Shift operation is 3∆t
+*2s complement operation is n*∆t (n is the operand length).
